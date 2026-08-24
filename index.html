@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hamilton, Ontario Quiz</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap');
+
+  :root {
+    --steel-blue: #1a3a5c;
+    --steel-blue-light: #2a5a8c;
+    --steel-blue-dark: #0f2440;
+    --amber: #d4940a;
+    --amber-light: #f0b429;
+    --amber-glow: rgba(212, 148, 10, 0.25);
+    --steel-dark: #0d1b2a;
+    --steel-mid: #1b2838;
+    --steel-light: #243447;
+    --text-light: #e8edf3;
+    --text-muted: #8fa3b8;
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --white: #ffffff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--steel-dark);
+    color: var(--text-light);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Background Pattern */
+  .bg-pattern {
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(26, 58, 92, 0.4) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(212, 148, 10, 0.1) 0%, transparent 50%),
+      linear-gradient(180deg, var(--steel-dark) 0%, #0a1420 100%);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Steel texture overlay */
+  .bg-texture {
+    position: fixed;
+    inset: 0;
+    opacity: 0.03;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px),
+      repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.02) 2px, rgba(255,255,255,0.02) 4px);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .city-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, var(--amber), var(--amber-light));
+    color: var(--steel-dark);
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .city-badge svg { width: 14px; height: 14px; }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, var(--white) 0%, var(--text-muted) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  /* Progress Bar */
+  .progress-section {
+    margin-bottom: 28px;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .progress-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .progress-count {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--amber);
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: var(--steel-mid);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--amber), var(--amber-light));
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 12px var(--amber-glow);
+  }
+
+  /* Card */
+  .card {
+    background: linear-gradient(145deg, var(--steel-mid), var(--steel-light));
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: clamp(24px, 5vw, 36px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  /* Screen Transitions */
+  .screen {
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .screen.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-12px); }
+  }
+
+  /* Intro Screen */
+  .intro-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 24px;
+    background: linear-gradient(135deg, var(--steel-blue), var(--steel-blue-light));
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(26, 58, 92, 0.4);
+  }
+
+  .intro-icon svg { width: 36px; height: 36px; fill: var(--amber); }
+
+  .intro-features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 28px 0;
+  }
+
+  .intro-feature {
+    text-align: center;
+    padding: 16px 10px;
+    background: var(--steel-dark);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .intro-feature-icon {
+    font-size: 24px;
+    margin-bottom: 6px;
+  }
+
+  .intro-feature-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 32px;
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--amber), var(--amber-light));
+    color: var(--steel-dark);
+    box-shadow: 0 4px 20px rgba(212, 148, 10, 0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(212, 148, 10, 0.5);
+  }
+
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    background: var(--steel-light);
+    color: var(--text-light);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .btn-secondary:hover {
+    background: var(--steel-mid);
+    transform: translateY(-1px);
+  }
+
+  .btn-full { width: 100%; }
+
+  .btn svg { width: 18px; height: 18px; }
+
+  /* Question Screen */
+  .question-meta {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .difficulty-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .diff-easy { background: rgba(46, 204, 113, 0.15); color: #2ecc71; }
+  .diff-medium { background: rgba(241, 196, 41, 0.15); color: #f1c429; }
+  .diff-hard { background: rgba(231, 76, 60, 0.15); color: #e74c3c; }
+
+  .category-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(212, 148, 10, 0.12);
+    color: var(--amber);
+    border: 1px solid rgba(212, 148, 10, 0.2);
+  }
+
+  .question-text {
+    font-size: clamp(16px, 4vw, 19px);
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 28px;
+    color: var(--white);
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    background: var(--steel-dark);
+    border: 2px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-light);
+    text-align: left;
+    font-family: 'Inter', sans-serif;
+    width: 100%;
+  }
+
+  .option:hover:not(.disabled) {
+    border-color: var(--amber);
+    background: rgba(212, 148, 10, 0.05);
+    transform: translateX(4px);
+  }
+
+  .option.selected {
+    border-color: var(--amber);
+    background: rgba(212, 148, 10, 0.1);
+  }
+
+  .option.correct {
+    border-color: var(--green);
+    background: rgba(46, 204, 113, 0.1);
+  }
+
+  .option.incorrect {
+    border-color: var(--red);
+    background: rgba(231, 76, 60, 0.1);
+  }
+
+  .option.disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
+
+  .option-marker {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 8px;
+    background: var(--steel-mid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+  }
+
+  .option.selected .option-marker {
+    background: var(--amber);
+    color: var(--steel-dark);
+  }
+
+  .option.correct .option-marker { background: var(--green); color: var(--white); }
+  .option.incorrect .option-marker { background: var(--red); color: var(--white); }
+
+  .option-text { flex: 1; }
+
+  .option-icon {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .option.correct .option-icon,
+  .option.incorrect .option-icon { opacity: 1; }
+
+  /* Question Navigation */
+  .question-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .question-nav {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    max-width: 200px;
+  }
+
+  .nav-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--steel-dark);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.2s ease;
+  }
+
+  .nav-dot.answered { background: var(--amber); border-color: var(--amber); }
+  .nav-dot.current { background: var(--white); border-color: var(--white); box-shadow: 0 0 8px rgba(255,255,255,0.3); }
+  .nav-dot.correct { background: var(--green); border-color: var(--green); }
+  .nav-dot.wrong { background: var(--red); border-color: var(--red); }
+
+  /* Results Screen */
+  .results-card {
+    text-align: center;
+  }
+
+  .score-circle {
+    width: 160px;
+    height: 160px;
+    margin: 0 auto 24px;
+    position: relative;
+  }
+
+  .score-circle svg {
+    width: 160px;
+    height: 160px;
+    transform: rotate(-90deg);
+  }
+
+  .score-circle-bg {
+    fill: none;
+    stroke: var(--steel-dark);
+    stroke-width: 8;
+  }
+
+  .score-circle-fill {
+    fill: none;
+    stroke: url(#scoreGradient);
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .score-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .score-number {
+    font-size: 42px;
+    font-weight: 900;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--amber), var(--amber-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .score-total {
+    font-size: 16px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .result-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 5vw, 32px);
+    font-weight: 900;
+    margin-bottom: 8px;
+  }
+
+  .result-message {
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 28px;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .stat-item {
+    background: var(--steel-dark);
+    border-radius: 12px;
+    padding: 16px 12px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .stat-value.green { color: var(--green); }
+  .stat-value.red { color: var(--red); }
+  .stat-value.amber { color: var(--amber); }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Review Section */
+  .review-section {
+    margin: 28px 0;
+    text-align: left;
+  }
+
+  .review-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: var(--steel-dark);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    cursor: pointer;
+    color: var(--text-light);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    width: 100%;
+    transition: all 0.2s ease;
+  }
+
+  .review-toggle:hover {
+    background: var(--steel-light);
+  }
+
+  .review-toggle svg {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.3s ease;
+  }
+
+  .review-toggle.open svg { transform: rotate(180deg); }
+
+  .review-list {
+    display: none;
+    margin-top: 12px;
+  }
+
+  .review-list.open { display: block; }
+
+  .review-item {
+    background: var(--steel-dark);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    border-left: 3px solid;
+    font-size: 13px;
+  }
+
+  .review-item.correct { border-left-color: var(--green); }
+  .review-item.wrong { border-left-color: var(--red); }
+
+  .review-q {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--white);
+  }
+
+  .review-a {
+    color: var(--text-muted);
+  }
+
+  .review-a strong { color: var(--green); }
+
+  .review-wrong { color: var(--red); }
+
+  /* Buttons Row */
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-row .btn { flex: 1; min-width: 140px; }
+
+  /* Confetti */
+  .confetti-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: -10px;
+    animation: confettiFall linear forwards;
+  }
+
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* Certificate styling */
+  .certificate-border {
+    border: 2px solid var(--amber);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 20px 0;
+    position: relative;
+    background: linear-gradient(135deg, rgba(212, 148, 10, 0.03), transparent);
+  }
+
+  .certificate-border::before,
+  .certificate-border::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--amber);
+  }
+
+  .certificate-border::before {
+    top: -5px;
+    left: -5px;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .certificate-border::after {
+    bottom: -5px;
+    right: -5px;
+    border-left: none;
+    border-top: none;
+  }
+
+  .cert-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--amber);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .cert-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .footer p {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .intro-features { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .intro-feature { padding: 12px 6px; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .stat-item { padding: 12px 8px; }
+    .stat-value { font-size: 20px; }
+    .score-circle { width: 130px; height: 130px; }
+    .score-circle svg { width: 130px; height: 130px; }
+    .score-number { font-size: 34px; }
+    .btn-row { flex-direction: column; }
+    .btn-row .btn { min-width: 100%; }
+    .question-nav { max-width: 150px; }
+  }
+
+  /* Animations for screen transitions */
+  .screen-exit {
+    animation: slideOut 0.3s ease forwards;
+  }
+
+  /* Ripple effect for buttons */
+  .ripple {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+  }
+
+  .ripple:active::after {
+    width: 200px;
+    height: 200px;
+  }
+
+  /* Tooltip for question counter */
+  .score-tracker {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .score-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--steel-dark);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .score-chip svg { width: 12px; height: 12px; }
+  .score-chip.green { color: var(--green); border-color: rgba(46, 204, 113, 0.2); }
+  .score-chip.red { color: var(--red); border-color: rgba(231, 76, 60, 0.2); }
+</style>
+</head>
+<body>
+
+<div class="bg-pattern"></div>
+<div class="bg-texture"></div>
+
+<div class="container">
+  <div class="header">
+    <div class="city-badge">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      Ontario, Canada
+    </div>
+    <h1>Hamilton, Ontario</h1>
+    <p class="subtitle">Test your knowledge of The Hammer, Steeltown & the City of Waterfalls</p>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="progress-section" id="progressSection" style="display:none;">
+    <div class="progress-info">
+      <span class="progress-label">Question <span id="currentQ">1</span> of <span id="totalQ">15</span></span>
+      <span class="progress-count" id="scoreDisplay">Score: 0</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Intro Screen -->
+  <div class="screen active" id="introScreen">
+    <div class="card">
+      <div class="intro-icon">
+        <svg viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
+      </div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:clamp(1.5rem,4vw,2rem);text-align:center;margin-bottom:8px;">The Ultimate Hamilton Quiz</h2>
+      <p style="text-align:center;color:var(--text-muted);font-size:14px;line-height:1.6;">15 questions about Hamilton's geography, history, landmarks, notable people, sports, and modern transformation. How well do you know The Hammer?</p>
+
+      <div class="intro-features">
+        <div class="intro-feature">
+          <div class="intro-feature-icon">🏔️</div>
+          <div class="intro-feature-text">Geography</div>
+        </div>
+        <div class="intro-feature">
+          <div class="intro-feature-icon">⚙️</div>
+          <div class="intro-feature-text">History</div>
+        </div>
+        <div class="intro-feature">
+          <div class="intro-feature-icon">🏈</div>
+          <div class="intro-feature-text">Sports</div>
+        </div>
+        <div class="intro-feature">
+          <div class="intro-feature-icon">🎓</div>
+          <div class="intro-feature-text">Education</div>
+        </div>
+        <div class="intro-feature">
+          <div class="intro-feature-icon">🎵</div>
+          <div class="intro-feature-text">Culture</div>
+        </div>
+        <div class="intro-feature">
+          <div class="intro-feature-icon">🏛️</div>
+          <div class="intro-feature-text">Landmarks</div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary ripple" onclick="startQuiz()" style="flex:2;">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          Start Quiz
+        </button>
+        <button class="btn btn-secondary ripple" onclick="downloadQuiz()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Download
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Question Screen -->
+  <div class="screen" id="questionScreen">
+    <div class="card">
+      <div class="question-meta">
+        <span class="difficulty-badge" id="diffBadge"></span>
+        <span class="category-badge" id="catBadge"></span>
+      </div>
+      <p class="question-text" id="questionText"></p>
+      <div class="options" id="optionsContainer"></div>
+
+      <div class="question-footer">
+        <div class="question-nav" id="questionNav"></div>
+        <button class="btn btn-primary ripple" id="nextBtn" onclick="nextQuestion()" style="padding:10px 20px;font-size:13px;" disabled>
+          Next
+          <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Screen -->
+  <div class="screen" id="resultsScreen">
+    <div class="card results-card">
+      <div class="score-circle">
+        <svg viewBox="0 0 160 160">
+          <defs>
+            <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#d4940a"/>
+              <stop offset="100%" stop-color="#f0b429"/>
+            </linearGradient>
+          </defs>
+          <circle class="score-circle-bg" cx="80" cy="80" r="72"/>
+          <circle class="score-circle-fill" id="scoreCircle" cx="80" cy="80" r="72"
+            stroke-dasharray="452.39" stroke-dashoffset="452.39"/>
+        </svg>
+        <div class="score-inner">
+          <div class="score-number" id="finalScore">0</div>
+          <div class="score-total">/ <span id="finalTotal">15</span></div>
+        </div>
+      </div>
+
+      <div class="certificate-border">
+        <div class="cert-subtitle">Certificate of Achievement</div>
+        <div class="cert-title" id="certTitle">Hamilton Expert</div>
+      </div>
+
+      <h2 class="result-title" id="resultTitle">Fantastic Work!</h2>
+      <p class="result-message" id="resultMessage">You've demonstrated impressive knowledge of Hamilton, Ontario!</p>
+
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value green" id="correctCount">0</div>
+          <div class="stat-label">Correct</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value red" id="wrongCount">0</div>
+          <div class="stat-label">Incorrect</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value amber" id="accuracyRate">0%</div>
+          <div class="stat-label">Accuracy</div>
+        </div>
+      </div>
+
+      <div class="review-section">
+        <button class="review-toggle" id="reviewToggle" onclick="toggleReview()">
+          <span>📋 Review Answers</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="review-list" id="reviewList"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary ripple" onclick="retakeQuiz()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+          Retake Quiz
+        </button>
+        <button class="btn btn-secondary ripple" onclick="downloadQuiz()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Download
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>This quiz is free to use and can be hosted on GitHub Pages.</p>
+  </div>
+</div>
+
+<!-- Confetti Container -->
+<div class="confetti-container" id="confettiContainer"></div>
+
+<script>
+// ─── Quiz Data ───────────────────────────────────────────────
+const questions = [
+  {
+    question: "Hamilton, Ontario is nicknamed 'The Hammer.' What does this nickname specifically refer to?",
+    options: ["The city's industrial steel forges", "The sound of waterfalls, locally known as 'the hammer'", "The Hamilton Bulldogs hockey team mascot", "A reference to the city's founding under a hammer-shaped hill"],
+    correct: 0,
+    difficulty: "easy",
+    category: "Geography & Identity"
+  },
+  {
+    question: "How many waterfalls is Hamilton officially home to, earning it the nickname 'The City of Waterfalls'?",
+    options: ["Over 100", "Exactly 77", "Around 150", "Around 200"],
+    correct: 2,
+    difficulty: "medium",
+    category: "Geography"
+  },
+  {
+    question: "The Niagara Escarpment runs through Hamilton. Which famous trail utilizes this landscape for scenic hiking?",
+    options: ["The Pacific Crest Trail", "The Bruce Trail", "The Appalachian Trail", "The West Coast Trail"],
+    correct: 1,
+    difficulty: "easy",
+    category: "Geography"
+  },
+  {
+    question: "Webster's Falls is one of Hamilton's most iconic waterfalls. In which conservation area is it located?",
+    options: ["Dundas Valley Conservation Area", "Rattlesnake Point Conservation Area", "Glen Stewart Ravine", "Iroquoia Heights Conservation Area"],
+    correct: 0,
+    difficulty: "medium",
+    category: "Landmarks"
+  },
+  {
+    question: "Hamilton Harbour is a large natural harbour on the western tip of Lake Ontario. What major environmental restoration project transformed it in the 1990s?",
+    options: ["The Harbour Cleanup Initiative", "The Hamilton Harbour Remedial Action Plan", "Project Harbour Renewal", "Lake Ontario Revitalization Project"],
+    correct: 1,
+    difficulty: "hard",
+    category: "Geography & History"
+  },
+  {
+    question: "Hamilton was originally founded as a military settlement. What year was it officially incorporated as a town?",
+    options: ["1812", "1825", "1833", "1846"],
+    correct: 2,
+    difficulty: "hard",
+    category: "History"
+  },
+  {
+    question: "During the War of 1812, a famous battle took place near Hamilton. Which battle was it?",
+    options: ["Battle of York", "Battle of Stoney Creek", "Battle of Queenston Heights", "Battle of Chippawa"],
+    correct: 1,
+    difficulty: "medium",
+    category: "History"
+  },
+  {
+    question: "Which Canadian Prime Minister has a strong connection to Hamilton and has a heritage conservation site named after him in the area?",
+    options: ["Pierre Trudeau", "John A. Macdonald", "William Lyon Mackenzie King", "Sir Wilfrid Laurier"],
+    correct: 1,
+    difficulty: "medium",
+    category: "History"
+  },
+  {
+    question: "HMCS Haida, a restored WWII Tribal-class destroyer, is now a museum and national historic site. Where is it docked in Hamilton?",
+    options: ["Pier 9, on the waterfront", "Near Bayfront Park Marina", "At the Royal Hamilton Yacht Club", "At Pier 21 near the CN Tower replica"],
+    correct: 1,
+    difficulty: "medium",
+    category: "Landmarks"
+  },
+  {
+    question: "The Canadian Football Hall of Fame and Museum is located in Hamilton. What stadium is it adjacent to?",
+    options: ["Civic Stadium", "Tim Hortons Field", "The Brian non使馆 Stadium", "FirstOntario Centre"],
+    correct: 1,
+    difficulty: "easy",
+    category: "Sports & Landmarks"
+  },
+  {
+    question: "The Hamilton Tiger-Cats play in the CFL. What year were they formed through the merger of the Hamilton Tigers and Hamilton Wildcats?",
+    options: ["1946", "1950", "1952", "1968"],
+    correct: 1,
+    difficulty: "hard",
+    category: "Sports"
+  },
+  {
+    question: "McMaster University was established in Hamilton in what year?",
+    options: ["1887", "1908", "1928", "1945"],
+    correct: 2,
+    difficulty: "medium",
+    category: "Education"
+  },
+  {
+    question: "Mohawk College is one of Hamilton's major post-secondary institutions. In what area of the city is its main campus located?",
+    options: ["Downtown Hamilton", "The Mountain (Ancaster)", "Stoney Creek", "The west end near the harbour"],
+    correct: 3,
+    difficulty: "medium",
+    category: "Education"
+  },
+  {
+    question: "Kim Mitchell, the renowned Canadian musician, was born and raised in Hamilton. Which iconic Canadian band did he later join?",
+    options: ["The Tragically Hip", "Max Webster", "Rush", "The Guess Who"],
+    correct: 1,
+    difficulty: "hard",
+    category: "Notable People"
+  },
+  {
+    question: "As Hamilton transitioned from its industrial past, the city has embraced a cultural revival. What former industrial building was converted into a vibrant art and culture hub known as the 'Art Gallery of Hamilton's satellite'?",
+    options: ["The Cotton Factory", "The Cotton Mill Lofts", "The Standard Manufacturing Building", "The Westinghouse Plant"],
+    correct: 0,
+    difficulty: "hard",
+    category: "Modern Hamilton"
+  }
+];
+
+// ─── State ───────────────────────────────────────────────────
+let currentQuestion = 0;
+let score = 0;
+let answers = []; // { selected: index, correct: bool }
+let answered = false;
+let quizComplete = false;
+
+// ─── Helpers ─────────────────────────────────────────────────
+function shuffleOptions(options, correctIndex) {
+  const combined = options.map((text, i) => ({ text, isCorrect: i === correctIndex }));
+  for (let i = combined.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [combined[i], combined[j]] = [combined[j], combined[i]];
+  }
+  return {
+    shuffled: combined.map(c => c.text),
+    newCorrect: combined.findIndex(c => c.isCorrect)
+  };
+}
+
+function getDiffClass(diff) {
+  if (diff === 'easy') return 'diff-easy';
+  if (diff === 'hard') return 'diff-hard';
+  return 'diff-medium';
+}
+
+function getCertTitle(pct) {
+  if (pct === 100) return "🏆 Perfect Score — Hamilton Master!";
+  if (pct >= 80) return "⭐ Hamilton Expert";
+  if (pct >= 60) return "💎 Hamilton Enthusiast";
+  if (pct >= 40) return "🌟 Hamilton Explorer";
+  return "📍 Hamilton Rookie";
+}
+
+// ─── Screens ─────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.style.display = 'none';
+  });
+  const screen = document.getElementById(id);
+  screen.style.display = 'block';
+  // Small delay to trigger animation
+  setTimeout(() => screen.classList.add('active'), 10);
+}
+
+// ─── Intro ────────────────────────────────────────────────────
+function startQuiz() {
+  currentQuestion = 0;
+  score = 0;
+  answers = [];
+  quizComplete = false;
+  document.getElementById('progressSection').style.display = 'block';
+  document.getElementById('totalQ').textContent = questions.length;
+  document.getElementById('scoreDisplay').textContent = 'Score: 0';
+  renderQuestion();
+  showScreen('questionScreen');
+}
+
+// ─── Render Question ─────────────────────────────────────────
+function renderQuestion() {
+  const q = questions[currentQuestion];
+  const { shuffled, newCorrect } = shuffleOptions(q.options, q.correct);
+  // Store the shuffled correct index temporarily as a data attribute
+  const shuffledData = shuffled.map((text, i) => ({ text, isCorrect: i === newCorrect }));
+  // Update the question's correct index to match shuffled order for answer checking
+  questions[currentQuestion].shuffledCorrect = newCorrect;
+
+  document.getElementById('currentQ').textContent = currentQuestion + 1;
+  document.getElementById('progressFill').style.width = ((currentQuestion) / questions.length * 100) + '%';
+
+  document.getElementById('diffBadge').className = 'difficulty-badge ' + getDiffClass(q.difficulty);
+  document.getElementById('diffBadge').textContent = q.difficulty;
+  document.getElementById('catBadge').textContent = q.category;
+
+  document.getElementById('questionText').textContent = q.question;
+
+  const letters = ['A', 'B', 'C', 'D'];
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+
+  shuffledData.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.innerHTML = `
+      <span class="option-marker">${letters[i]}</span>
+      <span class="option-text">${opt.text}</span>
+      <span class="option-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;">
+          ${opt.isCorrect
+            ? '<path fill="#2ecc71" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>'
+            : '<path fill="#e74c3c" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>'}
+        </svg>
+      </span>`;
+    btn.style.cursor = 'pointer';
+    btn.onclick = () => selectAnswer(i, opt.isCorrect, btn);
+    container.appendChild(btn);
+  });
+
+  // Build nav dots
+  const nav = document.getElementById('questionNav');
+  nav.innerHTML = '';
+  for (let i = 0; i < questions.length; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'nav-dot';
+    if (i === currentQuestion) dot.classList.add('current');
+    nav.appendChild(dot);
+  }
+
+  answered = false;
+  document.getElementById('nextBtn').disabled = true;
+  document.getElementById('nextBtn').textContent = 'Next';
+  const nextBtnInner = document.getElementById('nextBtn');
+  nextBtnInner.innerHTML = 'Next <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>';
+}
+
+// ─── Answer Selection ─────────────────────────────────────────
+function selectAnswer(selectedIdx, isCorrect, btnEl) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[currentQuestion];
+  const correctIdx = q.shuffledCorrect;
+
+  // Disable all options
+  document.querySelectorAll('.option').forEach(opt => {
+    opt.classList.add('disabled');
+    opt.style.cursor = 'default';
+  });
+
+  // Show correct/incorrect
+  const allOptions = document.querySelectorAll('.option');
+  allOptions[correctIdx].classList.add('correct');
+  if (!isCorrect) {
+    btnEl.classList.add('incorrect');
+  }
+
+  // Record answer
+  answers.push({ selected: selectedIdx, correct: isCorrect });
+  if (isCorrect) score++;
+
+  // Update score display
+  document.getElementById('scoreDisplay').textContent = 'Score: ' + score;
+
+  // Update nav dot
+  const navDots = document.querySelectorAll('.nav-dot');
+  navDots[currentQuestion].classList.remove('current');
+  navDots[currentQuestion].classList.add(isCorrect ? 'correct' : 'wrong');
+
+  // Enable next button
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.disabled = false;
+
+  // Change button text on last question
+  if (currentQuestion === questions.length - 1) {
+    nextBtn.innerHTML = 'See Results <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>';
+  }
+}
+
+// ─── Next Question ────────────────────────────────────────────
+function nextQuestion() {
+  if (!answered) return;
+
+  if (currentQuestion < questions.length - 1) {
+    currentQuestion++;
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+// ─── Results ─────────────────────────────────────────────────
+function showResults() {
+  quizComplete = true;
+  document.getElementById('progressSection').style.display = 'none';
+  showScreen('resultsScreen');
+
+  const pct = Math.round((score / questions.length) * 100);
+  const circumference = 2 * Math.PI * 72;
+  const offset = circumference - (pct / 100) * circumference;
+
+  // Animate score circle
+  setTimeout(() => {
+    document.getElementById('scoreCircle').style.strokeDashoffset = offset;
+  }, 300);
+
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('finalTotal').textContent = questions.length;
+  document.getElementById('correctCount').textContent = score;
+  document.getElementById('wrongCount').textContent = questions.length - score;
+  document.getElementById('accuracyRate').textContent = pct + '%';
+
+  // Title and message
+  const titles = [
+    "Keep Exploring!",
+    "Not bad!",
+    "Good Work!",
+    "Great Job!",
+    "Impressive!",
+    "Amazing!",
+    "Outstanding!",
+    "Perfect!"
+  ];
+  const messages = [
+    "There's more to discover about Hamilton!",
+    "You know your way around The Hammer!",
+    "You clearly appreciate what Hamilton has to offer!",
+    "You've got solid knowledge of the Hammer!",
+    "Impressive familiarity with Hamilton, Ontario!",
+    "You really know your way around Steeltown!",
+    "Outstanding! You could guide a Hamilton city tour!",
+    "Perfect score! You ARE Hamilton!"
+  ];
+  const idx = Math.min(Math.floor(pct / 12.5), 7);
+  document.getElementById('resultTitle').textContent = titles[idx];
+  document.getElementById('resultMessage').textContent = messages[idx];
+  document.getElementById('certTitle').textContent = getCertTitle(pct);
+
+  // Build review list
+  const reviewList = document.getElementById('reviewList');
+  reviewList.innerHTML = '';
+
+  // Reset shuffledCorrect before generating review
+  questions.forEach((q, i) => {
+    const answer = answers[i];
+    if (!answer) return;
+    // Find what the question's shuffled correct index was - we stored it in answers
+    // Actually we stored it per question, so let's reconstruct
+    // We need the original question text, selected answer text, correct answer text
+    const { shuffled } = shuffleOptions(q.options, q.correct);
+    const selectedText = shuffled[answer.selected] || 'Unknown';
+    const correctText = shuffled[q.shuffledCorrect] || q.options[q.correct];
+
+    const item = document.createElement('div');
+    item.className = 'review-item ' + (answer.correct ? 'correct' : 'wrong');
+    item.innerHTML = `
+      <div class="review-q">${i + 1}. ${q.question}</div>
+      <div class="review-a">
+        <strong>Correct:</strong> ${correctText}
+        ${!answer.correct ? `<br><span class="review-wrong">Your answer: ${selectedText}</span>` : ''}
+      </div>`;
+    reviewList.appendChild(item);
+  });
+
+  // Confetti for high scores
+  if (pct >= 75) {
+    setTimeout(() => launchConfetti(pct), 500);
+  }
+}
+
+// ─── Confetti ─────────────────────────────────────────────────
+function launchConfetti(percent) {
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#d4940a', '#f0b429', '#2ecc71', '#3498db', '#e74c3c', '#ffffff', '#1a3a5c'];
+  const count = percent === 100 ? 200 : 100;
+
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+    piece.style.animationDelay = (Math.random() * 1.5) + 's';
+    piece.style.width = (Math.random() * 8 + 6) + 'px';
+    piece.style.height = (Math.random() * 8 + 6) + 'px';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.opacity = Math.random() * 0.6 + 0.4;
+    container.appendChild(piece);
+
+    // Remove after animation
+    setTimeout(() => {
+      piece.remove();
+    }, 5000);
+  }
+}
+
+// ─── Toggle Review ────────────────────────────────────────────
+function toggleReview() {
+  const toggle = document.getElementById('reviewToggle');
+  const list = document.getElementById('reviewList');
+  toggle.classList.toggle('open');
+  list.classList.toggle('open');
+}
+
+// ─── Retake ───────────────────────────────────────────────────
+function retakeQuiz() {
+  // Reset shuffledCorrect for each question
+  questions.forEach(q => {
+    if (q.shuffledCorrect !== undefined) delete q.shuffledCorrect;
+  });
+
+  currentQuestion = 0;
+  score = 0;
+  answers = [];
+  answered = false;
+  quizComplete = false;
+
+  // Reset score circle
+  document.getElementById('scoreCircle').style.strokeDashoffset = '452.39';
+  document.getElementById('progressFill').style.width = '0%';
+
+  showScreen('introScreen');
+}
+
+// ─── Download ─────────────────────────────────────────────────
+function downloadQuiz() {
+  const html = document.documentElement.outerHTML;
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'hamilton-ontario-quiz.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ─── Initialize ───────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Show intro by default
+  showScreen('introScreen');
+  document.getElementById('totalQ').textContent = questions.length;
+});
+</script>
+</body>
+</html>
